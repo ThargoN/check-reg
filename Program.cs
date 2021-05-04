@@ -10,7 +10,24 @@ namespace SoftBalance.check_reg
         private const string componentGuid = "CD968F5F-1776-4942-8884-573CFAE224E3";
         private const string progID = "Softbalance.OneC2RMQcom";
 
-        static void Main(string[] args)
+        static int Main(string[] args)
+        {
+            PrintHeader();
+
+            bool successful = TestCOMCreation();
+
+            /*
+            if (!successful)
+            {
+                TestRegistryEntries();
+            }
+            */
+
+            PrintFooter();
+            return successful ? 0 : 1;
+        }
+
+        private static void PrintHeader()
         {
             Console.WriteLine("Тест работы COM-объекта внешней компоненты OneC2RMQcom.");
             Console.WriteLine("\nИнформация о системе:");
@@ -23,20 +40,15 @@ namespace SoftBalance.check_reg
             Console.WriteLine($" * GUID: {componentGuid}");
             Console.WriteLine($" * ProgID: {progID}");
             Console.WriteLine("");
+        }
 
-            bool successful = TestCOMCreation();
-
-            if (!successful)
-            {
-                //Console.WriteLine("");
-                //Console.WriteLine("Проверяем регистрацию COM в реестре.");
-            }
-
-            if (System.Diagnostics.Debugger.IsAttached)
-            {
+        private static void PrintFooter()
+        {
+            //if (System.Diagnostics.Debugger.IsAttached)
+            //{
                 Console.WriteLine("\nPress enter...");
                 Console.ReadLine();
-            }
+            //}
         }
 
         private static bool TestCOMCreation()
@@ -79,6 +91,19 @@ namespace SoftBalance.check_reg
 
             return successful;
         }
+
+        private static bool TestRegistryEntries()
+        {
+            Console.WriteLine("");
+            Console.WriteLine("Проверяем регистрацию COM в реестре.");
+            Console.ForegroundColor = ConsoleColor.Red;
+
+            //TEMP:
+            Console.WriteLine("NYI");
+            Console.ResetColor();
+            return false;
+        }
+
     }
 
 }
