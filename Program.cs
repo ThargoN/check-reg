@@ -7,8 +7,8 @@ namespace SoftBalance.check_reg
 
     class Program
     {
-        private const string GUID = "CD968F5F-1776-4942-8884-573CFAE224E3";
-        private const string ProgID = "Softbalance.OneC2RMQcom";
+        private const string componentGuid = "CD968F5F-1776-4942-8884-573CFAE224E3";
+        private const string progID = "Softbalance.OneC2RMQcom";
 
         static void Main(string[] args)
         {
@@ -20,8 +20,8 @@ namespace SoftBalance.check_reg
             Console.WriteLine($"* Версия CLR: {Environment.Version}");
             Console.WriteLine($"* Путь CLR: {RuntimeEnvironment.GetRuntimeDirectory()}");
             Console.WriteLine("\nТестируемый COM Объект (предопределенные значения):");
-            Console.WriteLine($" * GUID: {GUID}");
-            Console.WriteLine($" * ProgID: {ProgID}");
+            Console.WriteLine($" * GUID: {componentGuid}");
+            Console.WriteLine($" * ProgID: {progID}");
             Console.WriteLine("");
 
             bool successful = TestCOMCreation();
@@ -50,30 +50,31 @@ namespace SoftBalance.check_reg
             {
                 Console.WriteLine("Попытка создания COM объекта.");
 
-                Console.Write($"Получаем тип на основании ProgID '{ProgID}'...");
-                _type = Type.GetTypeFromProgID(ProgID);
-                var _typeGuid = _type.GUID;
-                var guidEqualityString = _typeGuid == Guid.Parse(GUID) ? "совпадает" : "НЕ СОВПАДАЕТ";
-                Console.WriteLine($" Готово. Полученный GUID: {_typeGuid} ({guidEqualityString})");
+                Console.Write($"Получаем тип на основании ProgID '{progID}'... ");
+                _type = Type.GetTypeFromProgID(progID);
+                Guid _typeGuid = _type.GUID;
+                string guidEqualityString = _typeGuid == Guid.Parse(componentGuid) ? "совпадает" : "НЕ СОВПАДАЕТ";
+                Console.WriteLine($"Готово. Полученный GUID: {_typeGuid} ({guidEqualityString})");
+                
 
-                Console.WriteLine("Создаем экземпляр объекта...");
+                Console.Write("Создаем экземпляр объекта... ");
                 obj = Activator.CreateInstance(_type);
+                Console.WriteLine("Готово.");
 
+                Console.Write("Обращаемся к свойствам компоненты... ");
                 string version = (string)_type.InvokeMember("Version", BindingFlags.GetProperty, null, obj, prms);
                 string buildInfo = (string)_type.InvokeMember("BuildInfo", BindingFlags.GetProperty, null, obj, null);
+                Console.WriteLine("Готово.");
 
                 successful = true;
-                Console.ForegroundColor = ConsoleColor.Green;
-                Console.WriteLine("Попытка успешно завершена.");
-                Console.ResetColor();
-                Console.WriteLine($"От компоненты получена информация: version: '{version}', buildinfo: '{buildInfo}'.");
+                Console.WriteLine($"От компоненты получена информация: Version: '{version}', BuildInfo: '{buildInfo}'.");
             }
             catch (Exception e)
             {
+                Console.WriteLine("Возникла ошибка:");
                 Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine(e.ToString());
                 Console.ResetColor();
-                Console.WriteLine("Попытка провалена.");
             }
 
             return successful;
