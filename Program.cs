@@ -32,6 +32,7 @@ namespace SoftBalance.check_reg
             Console.WriteLine($"Тест работы COM-объекта внешней компоненты OneC2RMQcom. Версия {Assembly.GetExecutingAssembly().GetName().Version}");
             Console.WriteLine("\nИнформация о системе:");
             Console.WriteLine($"* Операционная система: {Environment.OSVersion.VersionString} ({RuntimeInformation.ProcessArchitecture})");
+            Console.WriteLine($"* Имя ПК: {Environment.MachineName}");
             Console.WriteLine($"* Пользователь ОС: {Environment.UserName}");
             Console.WriteLine($"* .Net реализация: {RuntimeInformation.FrameworkDescription}");
             Console.WriteLine($"* Версия CLR: {Environment.Version}");
@@ -44,11 +45,11 @@ namespace SoftBalance.check_reg
 
         private static void PrintFooter()
         {
-            //if (System.Diagnostics.Debugger.IsAttached)
-            //{
+            if(!Console.IsOutputRedirected)
+            {
                 Console.WriteLine("\nPress enter...");
                 Console.ReadLine();
-            //}
+            }
         }
 
         private static bool TestCOMCreation()
