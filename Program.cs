@@ -29,7 +29,7 @@ namespace SoftBalance.check_reg
 
         private static void PrintHeader()
         {
-            Console.WriteLine("Тест работы COM-объекта внешней компоненты OneC2RMQcom.");
+            Console.WriteLine($"Тест работы COM-объекта внешней компоненты OneC2RMQcom. Версия {Assembly.GetExecutingAssembly().GetName().Version}");
             Console.WriteLine("\nИнформация о системе:");
             Console.WriteLine($"* Операционная система: {Environment.OSVersion.VersionString} ({RuntimeInformation.ProcessArchitecture})");
             Console.WriteLine($"* Пользователь ОС: {Environment.UserName}");
