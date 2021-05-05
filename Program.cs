@@ -14,17 +14,17 @@ namespace SoftBalance.check_reg
         {
             PrintHeader();
 
-            bool successful = TestCOMCreation();
+            int errCode = TestCOMCreation();
 
             /*
-            if (!successful)
+            if (errCode != 0)
             {
                 TestRegistryEntries();
             }
             */
 
             PrintFooter();
-            return successful ? 0 : 1;
+            return errCode;
         }
 
         private static void PrintHeader()
@@ -52,12 +52,12 @@ namespace SoftBalance.check_reg
             }
         }
 
-        private static bool TestCOMCreation()
+        private static int TestCOMCreation()
         {
             Type _type;
             Object obj;
             Object[] prms = new Object[] { }; // Массив пустой, т.к. мы запросим метод Get, принимающий 0 параметров
-            bool successful = false;
+            int errCode = 2;
 
             try
             {
@@ -68,8 +68,9 @@ namespace SoftBalance.check_reg
                 Guid _typeGuid = _type.GUID;
                 string guidEqualityString = _typeGuid == Guid.Parse(componentGuid) ? "совпадает" : "НЕ СОВПАДАЕТ";
                 Console.WriteLine($"Готово. Полученный GUID: {_typeGuid} ({guidEqualityString})");
-                
 
+
+                errCode = 1;
                 Console.Write("Создаем экземпляр объекта... ");
                 obj = Activator.CreateInstance(_type);
                 Console.WriteLine("Готово.");
@@ -79,7 +80,7 @@ namespace SoftBalance.check_reg
                 string buildInfo = (string)_type.InvokeMember("BuildInfo", BindingFlags.GetProperty, null, obj, null);
                 Console.WriteLine("Готово.");
 
-                successful = true;
+                errCode = 0;
                 Console.WriteLine($"От компоненты получена информация: Version: '{version}', BuildInfo: '{buildInfo}'.");
             }
             catch (Exception e)
@@ -90,7 +91,7 @@ namespace SoftBalance.check_reg
                 Console.ResetColor();
             }
 
-            return successful;
+            return errCode;
         }
 
         private static bool TestRegistryEntries()
