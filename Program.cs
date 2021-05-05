@@ -10,21 +10,30 @@ namespace SoftBalance.check_reg
         private const string componentGuid = "CD968F5F-1776-4942-8884-573CFAE224E3";
         private const string progID = "Softbalance.OneC2RMQcom";
 
+        private static bool automationMode = false;
+
         static int Main(string[] args)
         {
+            parseArgs(args);
             PrintHeader();
 
-            bool successful = TestCOMCreation();
+            int errCode = TestCOMCreation();
 
             /*
-            if (!successful)
+            if (errCode != 0)
             {
                 TestRegistryEntries();
             }
             */
 
             PrintFooter();
-            return successful ? 0 : 1;
+            return errCode;
+        }
+
+        private static void parseArgs(string[] args)
+        {
+            // проверка на наличие ключа '-a'
+            automationMode = Array.FindIndex<string>(args, s => s.Equals("-a", StringComparison.InvariantCultureIgnoreCase)) > -1;
         }
 
         private static void PrintHeader()
@@ -32,6 +41,7 @@ namespace SoftBalance.check_reg
             Console.WriteLine($"Тест работы COM-объекта внешней компоненты OneC2RMQcom. Версия {Assembly.GetExecutingAssembly().GetName().Version}");
             Console.WriteLine("\nИнформация о системе:");
             Console.WriteLine($"* Операционная система: {Environment.OSVersion.VersionString} ({RuntimeInformation.ProcessArchitecture})");
+            Console.WriteLine($"* Имя ПК: {Environment.MachineName}");
             Console.WriteLine($"* Пользователь ОС: {Environment.UserName}");
             Console.WriteLine($"* .Net реализация: {RuntimeInformation.FrameworkDescription}");
             Console.WriteLine($"* Версия CLR: {Environment.Version}");
@@ -44,31 +54,30 @@ namespace SoftBalance.check_reg
 
         private static void PrintFooter()
         {
-            //if (System.Diagnostics.Debugger.IsAttached)
-            //{
-                Console.WriteLine("\nPress enter...");
-                Console.ReadLine();
-            //}
+            if (automationMode || Console.IsOutputRedirected) return;
+
+            Console.WriteLine("\nPress enter...");
+            Console.ReadLine();
         }
 
-        private static bool TestCOMCreation()
+        private static int TestCOMCreation()
         {
             Type _type;
             Object obj;
             Object[] prms = new Object[] { }; // Массив пустой, т.к. мы запросим метод Get, принимающий 0 параметров
-            bool successful = false;
+            int errCode = 2;
 
             try
             {
                 Console.WriteLine("Попытка создания COM объекта.");
 
                 Console.Write($"Получаем тип на основании ProgID '{progID}'... ");
-                _type = Type.GetTypeFromProgID(progID);
+                _type = Type.GetTypeFromProgID(progID, true);
                 Guid _typeGuid = _type.GUID;
                 string guidEqualityString = _typeGuid == Guid.Parse(componentGuid) ? "совпадает" : "НЕ СОВПАДАЕТ";
                 Console.WriteLine($"Готово. Полученный GUID: {_typeGuid} ({guidEqualityString})");
-                
 
+                errCode = 1;
                 Console.Write("Создаем экземпляр объекта... ");
                 obj = Activator.CreateInstance(_type);
                 Console.WriteLine("Готово.");
@@ -78,7 +87,7 @@ namespace SoftBalance.check_reg
                 string buildInfo = (string)_type.InvokeMember("BuildInfo", BindingFlags.GetProperty, null, obj, null);
                 Console.WriteLine("Готово.");
 
-                successful = true;
+                errCode = 0;
                 Console.WriteLine($"От компоненты получена информация: Version: '{version}', BuildInfo: '{buildInfo}'.");
             }
             catch (Exception e)
@@ -89,7 +98,7 @@ namespace SoftBalance.check_reg
                 Console.ResetColor();
             }
 
-            return successful;
+            return errCode;
         }
 
         private static bool TestRegistryEntries()
