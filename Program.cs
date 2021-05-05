@@ -10,8 +10,11 @@ namespace SoftBalance.check_reg
         private const string componentGuid = "CD968F5F-1776-4942-8884-573CFAE224E3";
         private const string progID = "Softbalance.OneC2RMQcom";
 
+        private static bool automationMode = false;
+
         static int Main(string[] args)
         {
+            parseArgs(args);
             PrintHeader();
 
             int errCode = TestCOMCreation();
@@ -25,6 +28,12 @@ namespace SoftBalance.check_reg
 
             PrintFooter();
             return errCode;
+        }
+
+        private static void parseArgs(string[] args)
+        {
+            // проверка на наличие ключа '-a'
+            automationMode = Array.FindIndex<string>(args, s => s.Equals("-a", StringComparison.InvariantCultureIgnoreCase)) > -1;
         }
 
         private static void PrintHeader()
@@ -45,11 +54,10 @@ namespace SoftBalance.check_reg
 
         private static void PrintFooter()
         {
-            if(!Console.IsOutputRedirected)
-            {
-                Console.WriteLine("\nPress enter...");
-                Console.ReadLine();
-            }
+            if (automationMode || Console.IsOutputRedirected) return;
+
+            Console.WriteLine("\nPress enter...");
+            Console.ReadLine();
         }
 
         private static int TestCOMCreation()
@@ -64,11 +72,10 @@ namespace SoftBalance.check_reg
                 Console.WriteLine("Попытка создания COM объекта.");
 
                 Console.Write($"Получаем тип на основании ProgID '{progID}'... ");
-                _type = Type.GetTypeFromProgID(progID);
+                _type = Type.GetTypeFromProgID(progID, true);
                 Guid _typeGuid = _type.GUID;
                 string guidEqualityString = _typeGuid == Guid.Parse(componentGuid) ? "совпадает" : "НЕ СОВПАДАЕТ";
                 Console.WriteLine($"Готово. Полученный GUID: {_typeGuid} ({guidEqualityString})");
-
 
                 errCode = 1;
                 Console.Write("Создаем экземпляр объекта... ");
